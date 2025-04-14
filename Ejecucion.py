@@ -5,7 +5,7 @@ ruta_archivo = r'C:\Users\Vixof\OneDrive\Documentos\Empleados\Dataset\dataset_em
 
 # Abre Excel en segundo plano
 excel = win32com.client.Dispatch("Excel.Application")
-excel.Visible = True  # Cambia a True si quieres ver Excel abierto
+excel.Visible = True
 
 # Abre el archivo
 wb = excel.Workbooks.Open(ruta_archivo)
