@@ -1,5 +1,4 @@
 import win32com.client
-
 # Ruta al archivo Excel
 ruta_archivo = r'C:\Users\Vixof\OneDrive\Documentos\Empleados\Dataset\dataset_empleados.xlsm'
 

@@ -5,12 +5,34 @@ import win32com.client
 import subprocess
 import os
 
+# Considerar ejecutar la función realizar_accion_integrado en un hilo separado usando la biblioteca threading para mantener la interfaz responsiva.
+def realizar_accion_integrado():
+        try:
+            # Ruta al archivo Excel
+            #!!!tkinter.filedialog!!! EVALUAR
+            ruta_archivo = r'C:\Users\Vixof\OneDrive\Documentos\Empleados\Dataset\dataset_empleados.xlsm'
+            # Abre Excel en segundo plano
+            excel = win32com.client.Dispatch("Excel.Application")
+            excel.Visible = True
+            # Abre el archivo
+            wb = excel.Workbooks.Open(ruta_archivo)
+            # Ejecuta la macro
+            excel.Application.Run("dataset_empleados.xlsm!Main")
+            # Guarda y cierra
+            wb.Save()
+            wb.Close()
+            # Cierra Excel
+            excel.Quit()
+            # Limpieza
+            del excel
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error al ejecutar la macro: {e}")
+
 def ejecutar_macro():
-    print("Ejecutado.")
-    """"
+    print("Ejecutando...")
     ruta_script = r"C:\Workspace\PoC\Ejecucion.py"
     subprocess.run(["python", ruta_script])
-    """
+    
     
 def mostrar_advertencia():
     messagebox.showwarning("Advertencia", "Funcionalidad fuera de servicio, este software esta en fase de desarrollo.")
@@ -35,7 +57,7 @@ boton_menu.pack(side="left", padx=10, pady=5)
 boton_estilizado = tk.Button(
     ventana,
     text="Ejecutar Macro Excel",
-    command=ejecutar_macro,
+    command=realizar_accion_integrado,
     font=fuente_grande,
     bg="#9B3B8B",
     fg="white",
