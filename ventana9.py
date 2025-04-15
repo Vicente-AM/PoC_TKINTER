@@ -10,7 +10,12 @@ texto = tk.Text(ventana, width=40, height=10, wrap="word", bg="lightgrey", fg="b
 texto.pack()
 
 # Texto con srollbar
-texto_desplazable = ScrolledText(ventana, width=40, height=10, wrap="word", bg="lightgrey", fg="black", padx=1, pady=10, font=("Arial", 12))
+texto_desplazable = ScrolledText(ventana, width=40, height=10, wrap="word", bg="lightgrey", fg="black", padx=10, pady=10, font=("Arial", 12))
+texto_desplazable.insert("1.0","Texto insertado de prueba", "resaltado") # Insertamos el texto de prueba y asignamos "resaltado" que es una config de texto
+texto_desplazable.tag_config("resaltado", background="yellow", foreground="black") # Creamos la configuracion "resaltado"
 texto_desplazable.pack()
+
+contenido = texto_desplazable.get("1.0","end") # Obtenemos todo el texto de texto_desplazable y le guardamos en variable contenido
+print(contenido)
 
 ventana.mainloop()
