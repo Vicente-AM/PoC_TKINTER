@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import font
 
 ventana = tk.Tk()
-ventana.title("Menú con Menubutton")
+ventana.title("BC Ripley automation")
 ventana.geometry("720x480")
 ventana.configure(bg="white")
 
