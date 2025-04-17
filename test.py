@@ -56,6 +56,11 @@ class MiInterfaz(tk.Tk):
         self.fuente_grande = font.Font(family=ESTILOS["fuente_general"][0], size=ESTILOS["tamaño_fuente_M"])
         self.ruta_archivo_input = ""
         self.macro_input = ""
+        self.ruta_label_texto = tk.StringVar()  # Variables para el texto de los labels
+        self.macro_label_texto = tk.StringVar()
+        self.ruta_label_texto.set("Ruta no asignada") # Texto inicial
+        self.macro_label_texto.set("Macro no asignada") # Texto inicial
+        self.menu_contextual_entrada = tk.Menu(self, tearoff=0) # Menú contextual para copiar, cortar y pegar
 
         self.barra_superior = tk.Frame(self, bg=ESTILOS["bg_barra_superior"], height=40)
         self.barra_superior.pack(side="top", fill="x")
@@ -63,7 +68,7 @@ class MiInterfaz(tk.Tk):
         boton_menu = tk.Menubutton(
             self.barra_superior,
             text="Menú",
-            font=font.Font(family=ESTILOS["fuente_menu"][0], size=ESTILOS["tamaño_fuente_M"]),
+            font=font.Font(family=ESTILOS["fuente_menu"][0], size=ESTILOS["tamaño_fuente_M"], weight="normal"), # Añadimos weight="normal"
             bg=ESTILOS["bg_barra_superior"],
             fg=ESTILOS["color_texto_menu"],
             relief=ESTILOS["relief_menu"],
@@ -72,9 +77,9 @@ class MiInterfaz(tk.Tk):
         boton_menu.pack(side="left", padx=10, pady=5)
 
         menu_opciones = tk.Menu(boton_menu, tearoff=0, font=self.fuente_grande)
-        menu_opciones.add_command(label="Abrir Otra Pantalla", command=self.mostrar_pantalla_input)
-        menu_opciones.add_command(label="Volver a Principal", command=self.mostrar_pantalla_principal)
-        menu_opciones.add_command(label="Opción 2 (sin acción)", command=self.mostrar_advertencia)
+        menu_opciones.add_command(label="Pantalla Principal", command=self.mostrar_pantalla_principal)
+        menu_opciones.add_command(label="Pantalla Input", command=self.mostrar_pantalla_input)
+        menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
         menu_opciones.add_separator()
         menu_opciones.add_command(label="Salir", command=self.quit)
         boton_menu.config(menu=menu_opciones)
@@ -99,8 +104,20 @@ class MiInterfaz(tk.Tk):
         self.bloque_morado.place(relx=0.7, rely=0.0, relwidth=0.3, relheight=1.0)
         self.footer.pack(side="bottom", fill="x")
 
+        # Establecer el tamaño mínimo de la ventana
+        self.minsize(600, 470) # Ejemplo: ancho mínimo de 600 píxeles y alto mínimo de 400 píxeles
+
+
     def crear_pantalla_principal(self):
         pantalla = tk.Frame(self.contenedor_principal, bg=ESTILOS["bg_principal"])
+
+        # Labels para mostrar la información
+        ruta_label = tk.Label(pantalla, textvariable=self.ruta_label_texto, bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"])
+        ruta_label.pack(pady=10)
+
+        macro_label = tk.Label(pantalla, textvariable=self.macro_label_texto, bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"])
+        macro_label.pack(pady=10)
+
         boton_estilizado = tk.Button(
             pantalla,
             text="Ejecutar",
@@ -111,8 +128,20 @@ class MiInterfaz(tk.Tk):
             relief=ESTILOS["relief_boton_principal"],
             activebackground=ESTILOS["activebg_boton_principal"],
             padx=ESTILOS["padx_boton_principal"],
-            pady=ESTILOS["pady_boton_principal"]
+            pady=ESTILOS["pady_boton_principal"],
+            cursor="hand2"  # Cambia el cursor a una mano
         )
+
+        # Se añaden funciones para responsividad del boton ejecutar
+        def on_enter(event):
+            boton_estilizado.config(bg=ESTILOS["activebg_boton_principal"])
+
+        def on_leave(event):
+            boton_estilizado.config(bg=ESTILOS["bg_boton_principal"])
+
+        boton_estilizado.bind("<Enter>", on_enter)
+        boton_estilizado.bind("<Leave>", on_leave)
+
         boton_estilizado.pack(pady=100)
         return pantalla
 
@@ -121,15 +150,24 @@ class MiInterfaz(tk.Tk):
 
         tk.Label(pantalla_input, text="INPUT", bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_titulo_input"]).grid(row=0, column=0, columnspan=2, pady=(20, 10))
 
-        # Fila para "Ruta archivo"
+        # Label para "Ruta archivo"
         tk.Label(pantalla_input, text="Ruta archivo", bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"]).grid(row=1, column=0, padx=10, pady=5, sticky="w")
         self.entrada1 = tk.Entry(pantalla_input, bg=ESTILOS["color_input_bg"], font=ESTILOS["fuente_general"])
         self.entrada1.grid(row=1, column=1, padx=10, pady=5, sticky="ew")  # Reemplazado fill="x" con sticky="ew"
+        self.entrada1.bind("<Button-3>", self.mostrar_menu_contextual_entrada) # Binding
 
-        # Fila para "Macro"
+
+        # Label para "Macro"
         tk.Label(pantalla_input, text="Macro", bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"]).grid(row=2, column=0, padx=10, pady=5, sticky="w")
         self.entrada2 = tk.Entry(pantalla_input, bg=ESTILOS["color_input_bg"], font=ESTILOS["fuente_general"])
         self.entrada2.grid(row=2, column=1, padx=10, pady=5, sticky="ew")  # Reemplazado fill="x" con sticky="ew"
+        self.entrada2.bind("<Button-3>", self.mostrar_menu_contextual_entrada) # Binding
+
+        # Configurar el menú contextual añadiendo opciones
+        self.menu_contextual_entrada.add_command(label="Copiar", command=self.copiar_seleccion)
+        self.menu_contextual_entrada.add_command(label="Cortar", command=self.cortar_seleccion)
+        self.menu_contextual_entrada.add_command(label="Pegar", command=self.pegar_en_seleccion)
+
 
         btn_asignar = tk.Button(
             pantalla_input,
@@ -140,15 +178,58 @@ class MiInterfaz(tk.Tk):
             relief=ESTILOS["relief_btn_input"],
             font=ESTILOS["fuente_btn_input"],
             width=10,  # Ajusta el ancho
-            height=2   # Ajusta la altura, aunque grid controla el tamaño también
+            height=2,   # Ajusta la altura, aunque grid controla el tamaño también
+            cursor="hand2"  # Cambia el cursor a una mano
         )
         btn_asignar.grid(row=3, column=1, padx=(40), pady=20, sticky="e")
+
+        # Se añaden funciones para responsividad del boton asignar
+        def on_enter(event):
+            btn_asignar.config(bg=ESTILOS["activebg_boton_principal"])
+
+        def on_leave(event):
+            btn_asignar.config(bg=ESTILOS["bg_boton_principal"])
+
+        btn_asignar.bind("<Enter>", on_enter)
+        btn_asignar.bind("<Leave>", on_leave)
 
         # Configurar el peso de las columnas para que la entrada se expanda
         pantalla_input.columnconfigure(1, weight=1)
 
         return pantalla_input
+    
+    # Funciones copiar, cortar y pegar
 
+    def mostrar_menu_contextual_entrada(self, event):
+        try:
+            self.menu_contextual_entrada.post(event.x_root, event.y_root)
+            self._menu_entry_widget = event.widget # Guardar el widget que activó el menú
+        finally:
+            self.menu_contextual_entrada.grab_release()
+
+    def copiar_seleccion(self):
+        try:
+            texto = self._menu_entry_widget.selection_get()
+            self.clipboard_clear()
+            self.clipboard_append(texto)
+        except tk.TclError:
+            pass
+
+    def cortar_seleccion(self):
+        try:
+            texto = self._menu_entry_widget.selection_get()
+            self.clipboard_clear()
+            self.clipboard_append(texto)
+            self._menu_entry_widget.delete("sel.first", "sel.last")
+        except tk.TclError:
+            pass
+
+    def pegar_en_seleccion(self):
+        try:
+            texto = self.clipboard_get()
+            self._menu_entry_widget.insert(tk.INSERT, texto)
+        except tk.TclError:
+            pass
     def validar_datos_input(self):
         ruta_archivo = self.entrada1.get()
         macro = self.entrada2.get()
@@ -158,10 +239,11 @@ class MiInterfaz(tk.Tk):
         else:
             self.ruta_archivo_input = ruta_archivo
             self.macro_input = macro
+            # Actualizar el texto de los labels en la pantalla principal
+            self.ruta_label_texto.set(f"Ruta asignada: {self.ruta_archivo_input}")
+            self.macro_label_texto.set(f"Macro asignada: {self.macro_input}")
             print(f"Ruta del archivo introducida: {self.ruta_archivo_input}")
             print(f"Nombre de la macro introducida: {self.macro_input}")
-            # Aquí puedes llamar a la siguiente función para procesar los datos si es necesario inmediatamente
-            # self.ejecutar_macro() # Podrías llamar ejecutar_macro aquí si "Asignar" siempre implica ejecutar
             self.mostrar_pantalla_principal() # Volver a la pantalla principal después de asignar
 
     def mostrar_pantalla_input(self):
