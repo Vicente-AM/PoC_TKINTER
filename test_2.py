@@ -96,7 +96,7 @@ class Interfaz(tk.Tk):
         menu_opciones = tk.Menu(boton_menu, tearoff=0, font=self.fuente_grande)
         menu_opciones.add_command(label="Pantalla Principal", command=self.mostrar_pantalla_principal)
         #menu_opciones.add_command(label="Pantalla Input", command=self.mostrar_pantalla_input)
-        menu_opciones.add_command(label="Pantalla Parametria", command=self.mostrar_pantalla_parametria) # Nueva opción
+        menu_opciones.add_command(label="Pantalla Parametría", command=self.mostrar_pantalla_parametria) # Nueva opción
         #menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
         menu_opciones.add_separator()
         menu_opciones.add_command(label="Salir", command=self.quit)
@@ -255,7 +255,7 @@ class Interfaz(tk.Tk):
         self.parametros_frame.pack(fill="both", expand=True)
 
         # Título
-        tk.Label(self.parametros_frame, text="PARAMETRIA", font=ESTILOS["fuente_titulo_input"]).grid(row=0, column=0, columnspan=2, pady=(20, 10), sticky="ew")
+        tk.Label(self.parametros_frame, text="Parametría", font=ESTILOS["fuente_titulo_input"]).grid(row=0, column=0, columnspan=2, pady=(20, 10), sticky="ew")
 
         # Si queremos añadir más parametros a la vista de la pantalla parametria, basta con añadirlos a esta lista
         Parametros_list = ["Parametro 1", "Parametro 2", "Parametro 3"]
