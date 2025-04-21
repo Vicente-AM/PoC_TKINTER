@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
 import win32com.client
@@ -26,8 +27,7 @@ ESTILOS = {
     "fg_boton_principal": "white",
     "relief_boton_principal": "flat",
     "activebg_boton_principal": "#8B2B7B",
-    "padx_boton_principal": 20,
-    "pady_boton_principal": 10,
+    "fuente_titulo": ("Segoe UI", 24, "bold"),
 
     # Estilos del footer
     "bg_footer": "white",
@@ -45,9 +45,11 @@ ESTILOS = {
     "fuente_btn_input": ("Segoe UI", 12, "bold"),
     "color_borde_btn_input": "white",
     "fuente_titulo_input": ("Segoe UI", 14, "bold"),
+
+    # Estilos pantalla parametría
 }
 
-class MiInterfaz(tk.Tk):
+class Interfaz(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("BC Ripley automation")
@@ -61,6 +63,10 @@ class MiInterfaz(tk.Tk):
         self.ruta_label_texto.set("Ruta no asignada") # Texto inicial
         self.macro_label_texto.set("Macro no asignada") # Texto inicial
         self.menu_contextual_entrada = tk.Menu(self, tearoff=0) # Menú contextual para copiar, cortar y pegar
+        # Parametros de input, agregar más de ser necesario
+        self.parametro1_input = ""
+        self.parametro2_input = ""
+        self.parametro3_input = ""
 
         self.barra_superior = tk.Frame(self, bg=ESTILOS["bg_barra_superior"], height=40)
         self.barra_superior.pack(side="top", fill="x")
@@ -76,10 +82,12 @@ class MiInterfaz(tk.Tk):
         )
         boton_menu.pack(side="left", padx=10, pady=5)
 
+        # Definición de menú estatico, cada uno hace referencia a una opción del menú
         menu_opciones = tk.Menu(boton_menu, tearoff=0, font=self.fuente_grande)
         menu_opciones.add_command(label="Pantalla Principal", command=self.mostrar_pantalla_principal)
-        menu_opciones.add_command(label="Pantalla Input", command=self.mostrar_pantalla_input)
-        menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
+        #menu_opciones.add_command(label="Pantalla Input", command=self.mostrar_pantalla_input)
+        menu_opciones.add_command(label="Pantalla Parametria", command=self.mostrar_pantalla_parametria) # Nueva opción
+        #menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
         menu_opciones.add_separator()
         menu_opciones.add_command(label="Salir", command=self.quit)
         boton_menu.config(menu=menu_opciones)
@@ -87,11 +95,15 @@ class MiInterfaz(tk.Tk):
         self.contenedor_principal = tk.Frame(self) # Contenedor para las diferentes "páginas"
         self.contenedor_principal.pack(fill="both", expand=True)
 
+        # Creamos instacia de ventanas
         self.pantalla_principal = self.crear_pantalla_principal()
         self.pantalla_input = self.crear_pantalla_input()
+        self.pantalla_parametria = self.crear_pantalla_parametria()
 
+        # Insertamos ventanas en contenedor principal
         self.pantalla_principal.place(in_=self.contenedor_principal, x=0, y=0, relwidth=1, relheight=1)
         self.pantalla_input.place(in_=self.contenedor_principal, x=0, y=0, relwidth=1, relheight=1)
+        self.pantalla_parametria.place(in_=self.contenedor_principal, x=0, y=0, relwidth=1, relheight=1)
 
         self.mostrar_pantalla_principal() # Mostrar la primera pantalla
 
@@ -110,13 +122,17 @@ class MiInterfaz(tk.Tk):
 
     def crear_pantalla_principal(self):
         pantalla = tk.Frame(self.contenedor_principal, bg=ESTILOS["bg_principal"])
-
+        """ Comentamos estos label ya que no estarán en uso, puede que se usen en version futura
         # Labels para mostrar la información
         ruta_label = tk.Label(pantalla, textvariable=self.ruta_label_texto, bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"])
         ruta_label.pack(pady=10)
 
         macro_label = tk.Label(pantalla, textvariable=self.macro_label_texto, bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_general"])
         macro_label.pack(pady=10)
+        """
+        # En caso de esta interfaz en particular le agregamos el nombre de la iniciativa directamente
+        ruta_label = tk.Label(pantalla, text="Circular B-2234", bg=ESTILOS["bg_principal"], font=ESTILOS["fuente_titulo"])
+        ruta_label.pack(pady=10)
 
         boton_estilizado = tk.Button(
             pantalla,
@@ -127,8 +143,8 @@ class MiInterfaz(tk.Tk):
             fg=ESTILOS["fg_boton_principal"],
             relief=ESTILOS["relief_boton_principal"],
             activebackground=ESTILOS["activebg_boton_principal"],
-            padx=ESTILOS["padx_boton_principal"],
-            pady=ESTILOS["pady_boton_principal"],
+            padx=20,
+            pady=10,
             cursor="hand2"  # Cambia el cursor a una mano
         )
 
@@ -198,8 +214,98 @@ class MiInterfaz(tk.Tk):
 
         return pantalla_input
     
-    # Funciones copiar, cortar y pegar
+    def crear_pantalla_parametria(self):
+        pantalla_parametria = ttk.Frame(self.contenedor_principal, style="TFrame")
+        pantalla_parametria.pack(fill="both", expand=True)
 
+        # Canvas para contener los widgets con scroll
+        self.canvas = tk.Canvas(pantalla_parametria) # Guardamos la referencia en self.canvas
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        # Scrollbar vertical
+        scrollbar = ttk.Scrollbar(pantalla_parametria, orient="vertical", command=self.canvas.yview) # Usamos self.canvas aquí
+        scrollbar.pack(side="right", fill="y")
+
+        # Configurar el canvas para usar el scrollbar
+        self.canvas.configure(yscrollcommand=scrollbar.set) # Usamos self.canvas aquí
+        self.canvas.bind('<Configure>', lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))) # Usamos self.canvas aquí
+
+        # Frame interno para contener todos los widgets de los parámetros
+        self.parametros_frame = ttk.Frame(self.canvas, style="TFrame") # El frame interno va dentro del canvas
+        self.parametros_frame.pack(fill="both", expand=True)
+
+        # Título
+        tk.Label(self.parametros_frame, text="PARAMETRIA", font=ESTILOS["fuente_titulo_input"]).grid(row=0, column=0, columnspan=2, pady=(20, 10), sticky="ew")
+
+        Parametros_list = ["Parametro 1", "Parametro 2", "Parametro 3"]
+        self.entradas_parametros = {}
+
+        for i, nombre_parametro in enumerate(Parametros_list):
+            fila = i + 1
+            # Label para el nombre del parámetro
+            tk.Label(self.parametros_frame, text=f"{nombre_parametro}:", font=ESTILOS["fuente_general"]).grid(row=fila, column=0, padx=10, pady=5, sticky="w")
+            # Entry para el valor del parámetro
+            entry = tk.Entry(self.parametros_frame, bg=ESTILOS["color_input_bg"], font=ESTILOS["fuente_general"])
+            entry.grid(row=fila, column=1, padx=10, pady=5, sticky="ew")
+            entry.bind("<Button-3>", self.mostrar_menu_contextual_entrada)
+            self.entradas_parametros[nombre_parametro] = entry
+
+        """
+        btn_guardar_parametros = ttk.Button(
+            self.parametros_frame,
+            text="Guardar",
+            command=self.guardar_parametros,
+            style="TButton"
+        )
+        """
+        btn_guardar_parametros = tk.Button(
+            self.parametros_frame,
+            text="Guardar",
+            command=self.guardar_parametros,
+            bg=ESTILOS["bg_boton_principal"],
+            fg=ESTILOS["fg_boton_principal"],
+            relief=ESTILOS["relief_boton_principal"],
+            activebackground=ESTILOS["activebg_boton_principal"],
+            width=10,
+            height=2,
+            cursor="hand2"
+        )
+        # Locacion en pantalla del botón
+        btn_guardar_parametros.grid(row=len(Parametros_list) + 1, column=1, padx=(40), pady=20, sticky="e")
+        # Se añaden funciones para responsividad del boton ejecutar
+        def on_enter(event):
+            btn_guardar_parametros.config(bg=ESTILOS["activebg_boton_principal"])
+
+        def on_leave(event):
+            btn_guardar_parametros.config(bg=ESTILOS["bg_boton_principal"])
+
+        btn_guardar_parametros.bind("<Enter>", on_enter)
+        btn_guardar_parametros.bind("<Leave>", on_leave)
+
+        # Configurar el peso de las columnas para la responsividad dentro del frame de parámetros
+        self.parametros_frame.columnconfigure(0, weight=1)
+        self.parametros_frame.columnconfigure(1, weight=2)
+
+        # Modificación importante aquí: Configurar el canvas para que el frame interno se expanda con él
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.parametros_frame, anchor="nw")
+        self.canvas.bind('<Configure>', self._on_canvas_configure)
+
+        return pantalla_parametria
+
+    def _on_canvas_configure(self, event):
+        """Función para actualizar el ancho del frame interno del canvas cuando se redimensiona el canvas."""
+        self.canvas.itemconfig(self.canvas_window, width=event.width)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+    
+    # Obtenemos y guardamos los parametros ingresados en interfaz
+    def guardar_parametros(self):
+        valores_parametros = {}
+        for nombre_parametro, entrada in self.entradas_parametros.items():
+            valores_parametros[nombre_parametro] = entrada.get()
+        print("Valores de los parámetros:", valores_parametros)
+        # Aquí puedes hacer lo que necesites con los valores
+
+    # Funciones copiar, cortar y pegar
     def mostrar_menu_contextual_entrada(self, event):
         try:
             self.menu_contextual_entrada.post(event.x_root, event.y_root)
@@ -230,6 +336,10 @@ class MiInterfaz(tk.Tk):
             self._menu_entry_widget.insert(tk.INSERT, texto)
         except tk.TclError:
             pass
+
+
+    
+    # Validamos los datos de entrada de input en la pestaña de input para ejecucion de macro
     def validar_datos_input(self):
         ruta_archivo = self.entrada1.get()
         macro = self.entrada2.get()
@@ -246,12 +356,17 @@ class MiInterfaz(tk.Tk):
             print(f"Nombre de la macro introducida: {self.macro_input}")
             self.mostrar_pantalla_principal() # Volver a la pantalla principal después de asignar
 
+    # Implementamos la muestra de pantallas con el metodo tkraise
     def mostrar_pantalla_input(self):
         self.pantalla_input.tkraise()
 
     def mostrar_pantalla_principal(self):
         self.pantalla_principal.tkraise()
+    
+    def mostrar_pantalla_parametria(self):
+        self.pantalla_parametria.tkraise()
 
+    # Ejecución de macro
     def ejecutar_macro(self):
         if not self.ruta_archivo_input or not self.macro_input:
             messagebox.showerror("Error", "No se han asignado la ruta del archivo y/o la macro.")
@@ -278,5 +393,5 @@ class MiInterfaz(tk.Tk):
         messagebox.showwarning("Advertencia", "Funcionalidad fuera de servicio, este software esta en fase de desarrollo.")
 
 if __name__ == "__main__":
-    app = MiInterfaz()
+    app = Interfaz()
     app.mainloop()
