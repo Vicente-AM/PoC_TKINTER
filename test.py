@@ -56,12 +56,16 @@ class Interfaz(tk.Tk):
         self.geometry("720x480")
         self.configure(bg=ESTILOS["bg_principal"])
         self.fuente_grande = font.Font(family=ESTILOS["fuente_general"][0], size=ESTILOS["tamaño_fuente_M"])
-        self.ruta_archivo_input = ""
-        self.macro_input = ""
+        # Debug de archivo, se debe cambiar en caso de cambiar de ambiente de pruebas, de archivo y/o de macro
+        self.ruta_archivo_input = "C:\Workspace\PoC\Test.xlsm"
+        self.macro_input = "Main"
+        # ---
+        # Variables para input de macro, en desuso actualmente
         self.ruta_label_texto = tk.StringVar()  # Variables para el texto de los labels
         self.macro_label_texto = tk.StringVar()
         self.ruta_label_texto.set("Ruta no asignada") # Texto inicial
         self.macro_label_texto.set("Macro no asignada") # Texto inicial
+        # ---
         self.menu_contextual_entrada = tk.Menu(self, tearoff=0) # Menú contextual para copiar, cortar y pegar
         # Parametros de input, agregar más de ser necesario
         self.parametro1_input = ""
@@ -219,7 +223,7 @@ class Interfaz(tk.Tk):
         pantalla_parametria.pack(fill="both", expand=True)
 
         # Canvas para contener los widgets con scroll
-        self.canvas = tk.Canvas(pantalla_parametria) # Guardamos la referencia en self.canvas
+        self.canvas = tk.Canvas(pantalla_parametria, highlightthickness=0) # Guardamos la referencia en self.canvas
         self.canvas.pack(side="left", fill="both", expand=True)
 
         # Scrollbar vertical
@@ -237,6 +241,7 @@ class Interfaz(tk.Tk):
         # Título
         tk.Label(self.parametros_frame, text="PARAMETRIA", font=ESTILOS["fuente_titulo_input"]).grid(row=0, column=0, columnspan=2, pady=(20, 10), sticky="ew")
 
+        # Si queremos añadir más parametros a la vista de la pantalla parametria, basta con añadirlos a esta lista
         Parametros_list = ["Parametro 1", "Parametro 2", "Parametro 3"]
         self.entradas_parametros = {}
 
@@ -250,14 +255,6 @@ class Interfaz(tk.Tk):
             entry.bind("<Button-3>", self.mostrar_menu_contextual_entrada)
             self.entradas_parametros[nombre_parametro] = entry
 
-        """
-        btn_guardar_parametros = ttk.Button(
-            self.parametros_frame,
-            text="Guardar",
-            command=self.guardar_parametros,
-            style="TButton"
-        )
-        """
         btn_guardar_parametros = tk.Button(
             self.parametros_frame,
             text="Guardar",
@@ -293,17 +290,60 @@ class Interfaz(tk.Tk):
         return pantalla_parametria
 
     def _on_canvas_configure(self, event):
-        """Función para actualizar el ancho del frame interno del canvas cuando se redimensiona el canvas."""
+        """Función para actualizar el ancho y la región de scroll del canvas cuando se redimensiona el canvas."""
         self.canvas.itemconfig(self.canvas_window, width=event.width)
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.canvas.configure(scrollregion=self.parametros_frame.bbox("all")) # Usamos el bbox del frame interno
     
     # Obtenemos y guardamos los parametros ingresados en interfaz
     def guardar_parametros(self):
-        valores_parametros = {}
-        for nombre_parametro, entrada in self.entradas_parametros.items():
-            valores_parametros[nombre_parametro] = entrada.get()
-        print("Valores de los parámetros:", valores_parametros)
+        # Definimos explícitamente las variables de destino para cada parámetro (Lista de parametros definida "Parametros_list")
+        # Aqui se deben usar los parametros y definir los nombre entre comillas "" tal cual en la lista "Parametros_list"
+        self.parametro_1 = self.entradas_parametros.get("Parametro 1", tk.StringVar()).get()
+        self.parametro_2 = self.entradas_parametros.get("Parametro 2", tk.StringVar()).get()
+        self.parametro_3 = self.entradas_parametros.get("Parametro 3", tk.StringVar()).get()
+        # Imprimimos los valores guardados para verificar
+        print("Valores de los parámetros guardados explícitamente:")
+        print(f"Parametro 1: {self.parametro_1}")
+        print(f"Parametro 2: {self.parametro_2}")
+        print(f"Parametro 3: {self.parametro_3}")
+        # Si necesitas guardar todos los parámetros en un diccionario también puedes hacerlo
+        self.parametros_guardados = {
+            "Parametro 1": self.parametro_1,
+            "Parametro 2": self.parametro_2,
+            "Parametro 3": self.parametro_3
+        }
+        print("Diccionario de parámetros guardados:", self.parametros_guardados)
+
+        #messagebox.showinfo("Parámetros", "Parámetros guardados.")
+
         # Aquí puedes hacer lo que necesites con los valores
+        try:
+            # Asegúrate de que self.ruta_archivo_input contiene la ruta correcta del archivo Excel
+            if not self.ruta_archivo_input:
+                messagebox.showerror("Error", "No se ha asignado la ruta del archivo Excel.")
+                return
+
+            excel = win32com.client.Dispatch("Excel.Application")
+            excel.Visible = False  # No mostrar Excel durante la operación
+            wb = excel.Workbooks.Open(self.ruta_archivo_input)
+            sh = wb.Sheets("Parametros")  # Accede a la hoja llamada "Parámetros"
+
+            # Escribe los valores en celdas específicas. Ajusta las celdas según tu necesidad.
+            # Por ejemplo, escribe el valor de Parametro 1 en la celda A1, Parametro 2 en B1, etc.
+            sh.Cells(2, 2).Value = self.parametro_1  # Celda B2 - 2, 2 Fila y columna respectivamente
+            sh.Cells(3, 2).Value = self.parametro_2  # Celda B3 - 3 => fila 3, 2 => columna B
+            #sh.Cells(1, 3).Value = self.parametro_3  # Celda C1
+
+            wb.Save()
+            wb.Close()
+            excel.Quit()
+            del excel
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error al escribir en Excel: {e}")
+
+        messagebox.showinfo("Parámetros", "Parámetros guardados.")
+        
 
     # Funciones copiar, cortar y pegar
     def mostrar_menu_contextual_entrada(self, event):
