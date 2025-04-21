@@ -95,7 +95,7 @@ class Interfaz(tk.Tk):
         # Definición de menú estatico, cada uno hace referencia a una opción del menú
         menu_opciones = tk.Menu(boton_menu, tearoff=0, font=self.fuente_grande)
         menu_opciones.add_command(label="Pantalla Principal", command=self.mostrar_pantalla_principal)
-        #menu_opciones.add_command(label="Pantalla Input", command=self.mostrar_pantalla_input)
+        menu_opciones.add_command(label="Pantalla Input*", command=self.mostrar_pantalla_input)
         menu_opciones.add_command(label="Pantalla Parametría", command=self.mostrar_pantalla_parametria) # Nueva opción
         #menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
         menu_opciones.add_separator()
