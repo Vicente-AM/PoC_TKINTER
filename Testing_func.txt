@@ -1,0 +1,30 @@
+import win32api
+import win32con
+import random
+import time
+
+a = 180
+b = 5
+
+print("Iniciando...")
+print(f"Moviendo cada {a} segundos.")
+print("Ctrl+C para detener.")
+
+try:
+    while True:
+        x, y = win32api.GetCursorPos()
+        dx = random.randint(-b, b)
+        dy = random.randint(-b, b)
+        nx = x + dx
+        ny = y + dy
+        if dx == 0 and dy == 0:
+            nx += 1
+
+        win32api.SetCursorPos((nx, ny))
+        print(f"Movido a ({nx}, {ny}). Esperando {a}...")
+        time.sleep(a)
+
+except KeyboardInterrupt:
+    print("\nDetenido.")
+except Exception as e:
+    print(f"\nError: {e}")
