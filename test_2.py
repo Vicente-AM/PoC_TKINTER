@@ -51,15 +51,6 @@ ESTILOS = {
 }
 
 class Interfaz(tk.Tk):
-    
-    def mostrar_pantalla_input_con_menu(self, event=None):
-        # Añadir la opción "Pantalla Input" al menú si no existe
-        menu_items = [self.menu_opciones.entrycget(i, 'label') for i in range(self.menu_opciones.index('end') + 1)]
-        if "Pantalla Input" not in menu_items:
-            self.menu_opciones.insert_command(self.menu_opciones.index('Pantalla Parametría') + 1,
-                                             label="Pantalla Input", command=self.mostrar_pantalla_input)
-        self.mostrar_pantalla_input()
-
     def __init__(self):
         super().__init__()
         self.title("BC Ripley automation")
@@ -137,15 +128,7 @@ class Interfaz(tk.Tk):
         # Establecer el tamaño mínimo de la ventana
         self.minsize(600, 470) # Ejemplo: ancho mínimo de 600 píxeles y alto mínimo de 400 píxeles
         # Vincular combinación de teclas
-        self.bind("<Control-i>", self.mostrar_pantalla_input_con_menu) # Usamos ctrl + i para mostrar la opcion input
-
-    def mostrar_pantalla_input_con_menu(self, event=None):
-        # Añadir la opción "Pantalla Input" al menú si no existe
-        menu_items = [self.menu_opciones.entrycget(i, 'label') for i in range(self.menu_opciones.index('end') + 1)]
-        if "Pantalla Input" not in menu_items:
-            self.menu_opciones.insert_command(self.menu_opciones.index('Pantalla Parametría') + 1,
-                                             label="Pantalla Input", command=self.mostrar_pantalla_input)
-        self.mostrar_pantalla_input()
+        self.bind("<Control-i>", self.mostrar_pantalla_input) # Usamos ctrl + i para mostrar la pantalla input
 
     def crear_pantalla_principal(self):
         pantalla = tk.Frame(self.contenedor_principal, bg=ESTILOS["bg_principal"])
@@ -443,7 +426,7 @@ class Interfaz(tk.Tk):
             self.mostrar_pantalla_principal() # Volver a la pantalla principal después de asignar
 
     # Implementamos la muestra de pantallas con el metodo tkraise
-    def mostrar_pantalla_input(self):
+    def mostrar_pantalla_input(self, event=None):
         self.pantalla_input.tkraise()
 
     def mostrar_pantalla_principal(self):
