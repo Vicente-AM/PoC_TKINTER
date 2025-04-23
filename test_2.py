@@ -51,6 +51,15 @@ ESTILOS = {
 }
 
 class Interfaz(tk.Tk):
+    
+    def mostrar_pantalla_input_con_menu(self, event=None):
+        # Añadir la opción "Pantalla Input" al menú si no existe
+        menu_items = [self.menu_opciones.entrycget(i, 'label') for i in range(self.menu_opciones.index('end') + 1)]
+        if "Pantalla Input" not in menu_items:
+            self.menu_opciones.insert_command(self.menu_opciones.index('Pantalla Parametría') + 1,
+                                             label="Pantalla Input", command=self.mostrar_pantalla_input)
+        self.mostrar_pantalla_input()
+
     def __init__(self):
         super().__init__()
         self.title("BC Ripley automation")
@@ -95,7 +104,7 @@ class Interfaz(tk.Tk):
         # Definición de menú estatico, cada uno hace referencia a una opción del menú
         menu_opciones = tk.Menu(boton_menu, tearoff=0, font=self.fuente_grande)
         menu_opciones.add_command(label="Pantalla Principal", command=self.mostrar_pantalla_principal)
-        menu_opciones.add_command(label="Pantalla Input*", command=self.mostrar_pantalla_input)
+        #menu_opciones.add_command(label="Pantalla Input*", command=self.mostrar_pantalla_input)
         menu_opciones.add_command(label="Pantalla Parametría", command=self.mostrar_pantalla_parametria) # Nueva opción
         #menu_opciones.add_command(label="Opción 3 (sin acción)", command=self.mostrar_advertencia)
         menu_opciones.add_separator()
@@ -125,10 +134,18 @@ class Interfaz(tk.Tk):
         self.bloque_morado = tk.Frame(self.footer, bg=ESTILOS["bg_bloque_morado"])
         self.bloque_morado.place(relx=0.7, rely=0.0, relwidth=0.3, relheight=1.0)
         self.footer.pack(side="bottom", fill="x")
-
         # Establecer el tamaño mínimo de la ventana
         self.minsize(600, 470) # Ejemplo: ancho mínimo de 600 píxeles y alto mínimo de 400 píxeles
+        # Vincular combinación de teclas
+        self.bind("<Control-i>", self.mostrar_pantalla_input_con_menu) # Usamos ctrl + i para mostrar la opcion input
 
+    def mostrar_pantalla_input_con_menu(self, event=None):
+        # Añadir la opción "Pantalla Input" al menú si no existe
+        menu_items = [self.menu_opciones.entrycget(i, 'label') for i in range(self.menu_opciones.index('end') + 1)]
+        if "Pantalla Input" not in menu_items:
+            self.menu_opciones.insert_command(self.menu_opciones.index('Pantalla Parametría') + 1,
+                                             label="Pantalla Input", command=self.mostrar_pantalla_input)
+        self.mostrar_pantalla_input()
 
     def crear_pantalla_principal(self):
         pantalla = tk.Frame(self.contenedor_principal, bg=ESTILOS["bg_principal"])
